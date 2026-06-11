@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Админ — все пользователи</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Все зарегистрированные пользователи</h2>
+        <div id="clearBtn"><button onclick="clearUsers()">Очистить всех</button></div>
+        <table id="usersTable">
+            <tr><th>ID</th><th>Ник</th><th>Пароль</th><th>Дата</th></tr>
+        </table>
+        <p id="empty" style="display:none">Пока нет ни одного пользователя.</p>
+        <p class="admin-link"><a href="index.html">На регистрацию</a></p>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

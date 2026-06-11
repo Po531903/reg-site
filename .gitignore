@@ -1,4 +1,2 @@
-*.pyc
-__pycache__/
-users.db
-.env
+.DS_Store
+Thumbs.db
