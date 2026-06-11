@@ -4,28 +4,20 @@
     <meta charset="UTF-8">
     <title>Админ — все пользователи</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        #loginScreen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 999;
-        }
-        #loginBox { background: #fff; padding: 30px; border-radius: 8px; width: 350px; text-align: center; }
-        #adminContent { display: none; }
-        .lock-btn { margin-top: 20px; background: #ff9800; width: auto; padding: 6px 14px; font-size: 13px; }
-        .lock-btn:hover { background: #e68900; }
-    </style>
 </head>
 <body>
-    <div id="loginScreen">
-        <div id="loginBox">
-            <h2>Вход в админку</h2>
-            <div id="loginError" class="error" style="display:none">Неверный пароль</div>
-            <input type="password" id="adminPass" placeholder="Пароль">
-            <button onclick="checkAdminPass()">Войти</button>
-        </div>
-    </div>
 
-    <div id="adminContent" class="container">
+<div id="loginScreen" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:999">
+    <div style="background:#fff;padding:30px;border-radius:8px;width:350px;text-align:center">
+        <h2>Вход в админку</h2>
+        <div id="loginError" class="error" style="display:none">Неверный пароль</div>
+        <input type="password" id="adminPass" placeholder="Пароль" style="display:block;width:100%;margin:10px 0;padding:10px;box-sizing:border-box;border:1px solid #ddd;border-radius:4px">
+        <button onclick="checkAdminPass()" style="width:100%;padding:12px;background:#4CAF50;color:white;border:none;border-radius:4px;cursor:pointer;font-size:16px">Войти</button>
+    </div>
+</div>
+
+<div id="adminContent" style="display:none">
+    <div class="container">
         <h2>Все зарегистрированные пользователи</h2>
         <div style="display:flex;gap:8px;margin-bottom:10px">
             <button onclick="clearUsers()">Очистить всех</button>
@@ -37,6 +29,8 @@
         <p id="empty" style="display:none">Пока нет ни одного пользователя.</p>
         <p class="admin-link"><a href="index.html">На регистрацию</a></p>
     </div>
-    <script src="app.js"></script>
+</div>
+
+<script src="app.js"></script>
 </body>
 </html>
