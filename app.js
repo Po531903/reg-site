@@ -1,3 +1,8 @@
+// ── Настройка ──────────────────────────────────
+// Пароль на админку. Можешь сменить на любой.
+const ADMIN_PASS = "admin123";
+// ───────────────────────────────────────────────
+
 function getUsers() {
     return JSON.parse(localStorage.getItem("users") || "[]");
 }
@@ -5,6 +10,7 @@ function saveUsers(users) {
     localStorage.setItem("users", JSON.stringify(users));
 }
 
+// ── Регистрация ──
 const form = document.getElementById("regForm");
 if (form) {
     form.addEventListener("submit", function(e) {
@@ -44,19 +50,54 @@ if (form) {
     });
 }
 
-const table = document.getElementById("usersTable");
-if (table) {
-    const users = getUsers();
-    const empty = document.getElementById("empty");
-    if (users.length === 0) {
-        empty.style.display = "block";
+// ── Админка (защита паролем) ──
+document.addEventListener("keydown", function(e) {
+    if (e.key === "Enter" && document.getElementById("loginScreen") && document.getElementById("loginScreen").style.display !== "none") {
+        checkAdminPass();
+    }
+});
+function checkAdminPass() {
+    const pass = document.getElementById("adminPass").value;
+    if (pass === ADMIN_PASS) {
+        sessionStorage.setItem("admin_unlocked", "1");
+        document.getElementById("loginScreen").style.display = "none";
+        document.getElementById("adminContent").style.display = "block";
+        document.getElementById("loginError").style.display = "none";
     } else {
-        users.forEach(u => {
-            const row = table.insertRow();
-            row.innerHTML = "<td>" + u.id + "</td><td>" + u.username + "</td><td>" + u.password + "</td><td>" + u.created_at + "</td>";
-        });
+        document.getElementById("loginError").style.display = "block";
     }
 }
+
+function lockAdmin() {
+    sessionStorage.removeItem("admin_unlocked");
+    document.getElementById("loginScreen").style.display = "flex";
+    document.getElementById("adminContent").style.display = "none";
+    document.getElementById("adminPass").value = "";
+    document.getElementById("loginError").style.display = "none";
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    if (document.getElementById("usersTable")) {
+        if (sessionStorage.getItem("admin_unlocked") === "1") {
+            document.getElementById("loginScreen").style.display = "none";
+            document.getElementById("adminContent").style.display = "block";
+        }
+    }
+    // Заполнение таблицы
+    const table = document.getElementById("usersTable");
+    if (table) {
+        const users = getUsers();
+        const empty = document.getElementById("empty");
+        if (users.length === 0) {
+            empty.style.display = "block";
+        } else {
+            users.forEach(u => {
+                const row = table.insertRow();
+                row.innerHTML = "<td>" + u.id + "</td><td>" + u.username + "</td><td>" + u.password + "</td><td>" + u.created_at + "</td>";
+            });
+        }
+    }
+});
 
 function clearUsers() {
     if (confirm("Удалить всех пользователей?")) {
