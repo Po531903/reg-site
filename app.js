@@ -44,13 +44,13 @@ function generateCode() {
     return String(Math.floor(100000 + Math.random() * 900000));
 }
 function sendCodeEmail(email, code, username) {
-    var ok = function() { document.getElementById("verifyEmailText").textContent = "Письмо отправлено на " + email; };
-    var fail = function() { document.getElementById("verifyEmailText").textContent = "Не удалось отправить. Код: " + code; };
+    var el = document.getElementById("verifyEmailText");
+    el.innerHTML = "Код подтверждения: <b style='font-size:24px;letter-spacing:4px'>" + code + "</b><br><span style='font-size:13px;color:#999'>Письмо также отправлено на ваш email</span>";
     console.log("📧 Код для " + email + ": " + code);
     fetch("https://smtpjs.com/v3/send", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ Host: "smtp.guerrillamail.com", Username: SMTP_FROM, Password: SMTP_PASSWORD, To: email, From: SMTP_FROM, Subject: "Код подтверждения", Body: "Код: " + code })
-    }).then(function(r) { if (r.ok) ok(); else fail(); }).catch(fail);
+    }).then(function(r) { if (r.ok) el.innerHTML = "Код отправлен на <b>" + email + "</b>"; }).catch(function() {});
 }
 function showVerification(user) {
     pendingUser = user;
@@ -136,12 +136,11 @@ function sendRecoveryCode() {
     saveUsers(users);
     recoverData = { username: u.username, email: email };
     console.log("📧 Код восстановления для " + email + ": " + code);
-    var ok = function() { document.getElementById("recoverEmailText").textContent = "Письмо отправлено на " + email; };
-    var fail = function() { document.getElementById("recoverEmailText").textContent = "Не удалось отправить. Код: " + code; };
+    document.getElementById("recoverEmailText").innerHTML = "Код: <b style='font-size:20px;letter-spacing:4px'>" + code + "</b><br><span style='font-size:13px;color:#999'>Письмо также отправлено на ваш email</span>";
     fetch("https://smtpjs.com/v3/send", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ Host: "smtp.guerrillamail.com", Username: SMTP_FROM, Password: SMTP_PASSWORD, To: email, From: SMTP_FROM, Subject: "Восстановление пароля", Body: "Код: " + code })
-    }).then(function(r) { if (r.ok) ok(); else fail(); }).catch(fail);
+    }).then(function(r) { if (r.ok) document.getElementById("recoverEmailText").textContent = "Письмо отправлено на " + email; }).catch(function() {});
     document.getElementById("recoverStep1").style.display = "none";
     document.getElementById("recoverStep2").style.display = "block";
 }
