@@ -40,12 +40,8 @@ function generateCode() {
     return String(Math.floor(100000 + Math.random() * 900000));
 }
 function sendCodeEmail(email, code, username) {
-    var debug = document.getElementById("verifyDebug");
-    if (debug) {
-        debug.style.display = "block";
-        debug.innerHTML = "📧 Код подтверждения для <b>" + email + "</b>: <b>" + code + "</b><br><small>(в реальном проекте отправляется на email)</small>";
-    }
-    document.getElementById("verifyEmailText").textContent = "Код отправлен на " + email;
+    console.log("📧 Код для " + email + ": " + code);
+    document.getElementById("verifyEmailText").textContent = "Письмо отправлено на " + email;
 }
 function showVerification(user) {
     pendingUser = user;
@@ -104,7 +100,6 @@ function showRecovery() {
     document.getElementById("recoverEmail").value = "";
     document.getElementById("recoverCode").value = "";
     document.getElementById("recoverNewPass").value = "";
-    document.getElementById("recoverDebug").style.display = "none";
     recoverData = null;
 }
 function cancelRecovery() {
@@ -131,10 +126,8 @@ function sendRecoveryCode() {
     u.recovery_code = code;
     saveUsers(users);
     recoverData = { username: u.username, email: email };
-    var debug = document.getElementById("recoverDebug");
-    debug.style.display = "block";
-    debug.innerHTML = "📧 Код восстановления для <b>" + email + "</b>: <b>" + code + "</b>";
-    document.getElementById("recoverEmailText").textContent = "Код отправлен на " + email;
+    console.log("📧 Код восстановления для " + email + ": " + code);
+    document.getElementById("recoverEmailText").textContent = "Письмо отправлено на " + email;
     document.getElementById("recoverStep1").style.display = "none";
     document.getElementById("recoverStep2").style.display = "block";
 }
