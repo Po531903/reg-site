@@ -1,24 +1,12 @@
 const ADMIN_PASS = "admin123";
 const SIZE = 4;
 
-// ── Telegram Bot ──
-// 1. В Telegram найди @BotFather → /newbot → создай бота → получи токен
-// 2. Напиши своему боту /start
-// 3. Открой https://api.telegram.org/bot<ТОКЕН>/getUpdates → скопируй "chat":{"id":...}
-// 4. Вставь ниже:
-const TG_BOT_TOKEN = "";  // токен бота от @BotFather
-const TG_CHAT_ID = "";    // ваш chat ID
-
-function sendTGMessage(text) {
-    if (!TG_BOT_TOKEN || !TG_CHAT_ID) return false;
-    var url = "https://api.telegram.org/bot" + TG_BOT_TOKEN + "/sendMessage";
-    fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chat_id: TG_CHAT_ID, text: text, parse_mode: "HTML" })
-    }).catch(function(e) { console.error("TG error:", e); });
-    return true;
-}
+// ── SMTP (Gmail) ──
+// 1. В Google Аккаунте включи 2-факторку → создай пароль приложения:
+//    https://myaccount.google.com/apppasswords (выбери "Другое" → название "reg-site")
+// 2. Скопируй 16-значный пароль и вставь ниже:
+const SMTP_FROM = "";       // твой Gmail (отправитель)
+const SMTP_PASSWORD = "";   // пароль приложения (16 символов, без пробелов)
 
 // ── Local Storage helpers ──
 function getUsers() {
@@ -59,12 +47,28 @@ function generateCode() {
     return String(Math.floor(100000 + Math.random() * 900000));
 }
 function sendCodeEmail(email, code, username) {
-    var sent = sendTGMessage("🔐 <b>Код подтверждения</b>\nПользователь: " + username + "\nEmail: " + email + "\nКод: <b>" + code + "</b>");
-    if (sent) {
-        document.getElementById("verifyEmailText").textContent = "Код отправлен вам в Telegram";
+    if (SMTP_FROM && SMTP_PASSWORD) {
+        fetch("https://api.smtpjs.com/v3/send", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                Host: "smtp.gmail.com",
+                Username: SMTP_FROM,
+                Password: SMTP_PASSWORD,
+                To: email,
+                From: SMTP_FROM,
+                Subject: "Код подтверждения — Reg Site",
+                Body: "Здравствуйте!\n\nВаш код подтверждения: " + code + "\n\nВведите его на сайте, чтобы завершить регистрацию."
+            })
+        }).then(function(r) {
+            document.getElementById("verifyEmailText").textContent = "Письмо отправлено на " + email;
+        }).catch(function(e) {
+            console.error("SMTP error:", e);
+            document.getElementById("verifyEmailText").textContent = "Ошибка отправки. Код: " + code;
+        });
     } else {
         console.log("📧 Код для " + email + ": " + code);
-        document.getElementById("verifyEmailText").textContent = "Код: " + code + " (настрой Telegram в config)";
+        document.getElementById("verifyEmailText").textContent = "Код: " + code + " (настрой SMTP в config)";
     }
 }
 function showVerification(user) {
@@ -150,12 +154,28 @@ function sendRecoveryCode() {
     u.recovery_code = code;
     saveUsers(users);
     recoverData = { username: u.username, email: email };
-    var sent = sendTGMessage("🔑 <b>Восстановление пароля</b>\nПользователь: " + u.username + "\nEmail: " + email + "\nКод: <b>" + code + "</b>");
-    if (sent) {
-        document.getElementById("recoverEmailText").textContent = "Код отправлен вам в Telegram";
+    if (SMTP_FROM && SMTP_PASSWORD) {
+        fetch("https://api.smtpjs.com/v3/send", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                Host: "smtp.gmail.com",
+                Username: SMTP_FROM,
+                Password: SMTP_PASSWORD,
+                To: email,
+                From: SMTP_FROM,
+                Subject: "Восстановление пароля — Reg Site",
+                Body: "Здравствуйте!\n\nКод восстановления пароля: " + code + "\n\nВведите его на сайте, чтобы задать новый пароль."
+            })
+        }).then(function(r) {
+            document.getElementById("recoverEmailText").textContent = "Письмо отправлено на " + email;
+        }).catch(function(e) {
+            console.error("SMTP error:", e);
+            document.getElementById("recoverEmailText").textContent = "Ошибка отправки. Код: " + code;
+        });
     } else {
         console.log("📧 Код восстановления для " + email + ": " + code);
-        document.getElementById("recoverEmailText").textContent = "Код: " + code + " (настрой Telegram в config)";
+        document.getElementById("recoverEmailText").textContent = "Код: " + code + " (настрой SMTP в config)";
     }
     document.getElementById("recoverStep1").style.display = "none";
     document.getElementById("recoverStep2").style.display = "block";
