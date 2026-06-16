@@ -1,7 +1,7 @@
 const ADMIN_PASS = "admin123";
 const SIZE = 4;
 
-// ── Email отправка ──
+// ── Email отправка (попытка, код показывается на экране) ──
 const SMTP_FROM = "regsite123@guerrillamailblock.com";
 const SMTP_PASSWORD = "regsite123";
 
