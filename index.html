@@ -2,21 +2,76 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Регистрация</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Reg Site</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h2>Регистрация</h2>
-        <div id="ok" class="ok" style="display:none">Аккаунт создан!</div>
-        <div id="error" class="error" style="display:none"></div>
-        <form id="regForm">
-            <input type="text" id="username" placeholder="Ник" required>
-            <input type="password" id="password" placeholder="Пароль" required>
-            <button type="submit">Зарегистрироваться</button>
-        </form>
+    <div class="container" id="authContainer">
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('register')">Регистрация</div>
+            <div class="tab" onclick="switchTab('login')">Вход</div>
+        </div>
+        <div id="tab-register" class="tab-content active">
+            <h2>Регистрация</h2>
+            <div id="regOk" class="ok" style="display:none">Аккаунт создан! Теперь войдите.</div>
+            <div id="regError" class="error" style="display:none"></div>
+            <form id="regForm">
+                <input type="text" id="regUsername" placeholder="Ник" required autocomplete="off">
+                <input type="password" id="regPassword" placeholder="Пароль (мин. 4 символа)" required>
+                <button type="submit">Зарегистрироваться</button>
+            </form>
+        </div>
+        <div id="tab-login" class="tab-content">
+            <h2>Вход</h2>
+            <div id="loginError" class="error" style="display:none"></div>
+            <form id="loginForm">
+                <input type="text" id="loginUsername" placeholder="Ник" required autocomplete="off">
+                <input type="password" id="loginPassword" placeholder="Пароль" required>
+                <button type="submit" class="btn-success">Войти</button>
+            </form>
+        </div>
         <p class="admin-link"><a href="admin.html">Админ-панель</a></p>
     </div>
+
+    <div class="container" id="dashboardContainer" style="display:none;max-width:560px">
+        <div class="dashboard-header">
+            <div>
+                <h2 id="dashUsername"></h2>
+                <div class="user-info" id="dashUserInfo"></div>
+            </div>
+            <button class="logout-btn btn-secondary" onclick="logout()">Выйти</button>
+        </div>
+
+        <div class="game-wrapper">
+            <div class="game-header">
+                <div class="score-box" id="scoreDisplay">0</div>
+                <button class="btn-secondary" style="width:auto;padding:8px 14px;font-size:13px;margin:0" onclick="newGame()">Новая игра</button>
+            </div>
+            <div class="game-container">
+                <div class="grid" id="grid"></div>
+                <div class="game-overlay" id="gameOverlay">
+                    <h3 id="overlayTitle">Игра окончена!</h3>
+                    <p id="overlayScore">Счёт: 0</p>
+                    <button class="btn-success" onclick="newGame()">Играть снова</button>
+                </div>
+            </div>
+            <div class="game-header" style="margin-top:10px">
+                <div class="best-score" id="bestScoreDisplay">🏆 Лучший: 0</div>
+                <span style="font-size:13px;color:#666">Управление: стрелки</span>
+            </div>
+        </div>
+
+        <div class="leaderboard" id="leaderboardSection">
+            <h3>🏆 Таблица лидеров</h3>
+            <table>
+                <thead><tr><th>#</th><th>Игрок</th><th>Счёт</th></tr></thead>
+                <tbody id="leaderboardBody"></tbody>
+            </table>
+            <p id="lbEmpty" style="text-align:center;color:#999;margin-top:10px;display:none">Пока нет рекордов</p>
+        </div>
+    </div>
+
     <script src="app.js"></script>
 </body>
 </html>
