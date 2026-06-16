@@ -23,14 +23,27 @@
         </div>
         <div id="tab-register" class="tab-content">
             <h2>Регистрация</h2>
-            <div id="regOk" class="ok" style="display:none">Аккаунт создан! Теперь войдите.</div>
+            <div id="regOk" class="ok" style="display:none">Аккаунт создан! Подтвердите email.</div>
             <div id="regError" class="error" style="display:none"></div>
             <form id="regForm">
+                <input type="email" id="regEmail" placeholder="Email" required autocomplete="off">
                 <input type="text" id="regUsername" placeholder="Ник" required autocomplete="off">
                 <input type="password" id="regPassword" placeholder="Пароль (мин. 4 символа)" required>
                 <button type="submit">Зарегистрироваться</button>
             </form>
         </div>
+    </div>
+
+    <div class="container" id="verifyContainer" style="display:none;max-width:400px;text-align:center">
+        <h2>Подтверждение email</h2>
+        <p style="color:#666;margin-bottom:16px" id="verifyEmailText">Код отправлен на ваш email</p>
+        <div id="verifyError" class="error" style="display:none"></div>
+        <div style="display:flex;gap:8px;justify-content:center;margin:16px 0">
+            <input type="text" id="verifyCode" placeholder="6-значный код" style="width:200px;text-align:center;font-size:20px;letter-spacing:6px" maxlength="6" autocomplete="off">
+        </div>
+        <button onclick="verifyEmail()" class="btn-success">Подтвердить</button>
+        <button onclick="resendCode()" class="btn-secondary" style="margin-top:8px;font-size:13px">Отправить код снова</button>
+        <p id="verifyDebug" style="margin-top:12px;font-size:12px;color:#999;display:none"></p>
     </div>
 
     <div class="container" id="dashboardContainer" style="display:none;max-width:560px">

@@ -235,7 +235,7 @@ button:active { transform: translateY(0); }
 /* Admin specific */
 .admin-stats {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 10px;
     margin-bottom: 16px;
 }
@@ -306,6 +306,6 @@ button:active { transform: translateY(0); }
 @media (max-width: 480px) {
     .container { padding: 20px; }
     .cell { font-size: 20px; }
-    .admin-stats { grid-template-columns: 1fr; }
+    .admin-stats { grid-template-columns: repeat(2, 1fr); }
     .dashboard-header { flex-direction: column; gap: 10px; }
 }

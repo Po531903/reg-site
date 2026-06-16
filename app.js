@@ -34,18 +34,77 @@ function switchTab(tab) {
     }
 }
 
+// ── Email Verification ──
+var pendingUser = null;
+function generateCode() {
+    return String(Math.floor(100000 + Math.random() * 900000));
+}
+function sendCodeEmail(email, code, username) {
+    var debug = document.getElementById("verifyDebug");
+    if (debug) {
+        debug.style.display = "block";
+        debug.innerHTML = "📧 Код подтверждения для <b>" + email + "</b>: <b>" + code + "</b><br><small>(в реальном проекте отправляется на email)</small>";
+    }
+    document.getElementById("verifyEmailText").textContent = "Код отправлен на " + email;
+}
+function showVerification(user) {
+    pendingUser = user;
+    document.getElementById("authContainer").style.display = "none";
+    document.getElementById("verifyContainer").style.display = "block";
+    document.getElementById("verifyCode").value = "";
+    document.getElementById("verifyError").style.display = "none";
+    sendCodeEmail(user.email, user.verification_code, user.username);
+}
+function verifyEmail() {
+    var code = document.getElementById("verifyCode").value.trim();
+    var err = document.getElementById("verifyError");
+    err.style.display = "none";
+    if (!code || code.length !== 6) {
+        err.textContent = "Введите 6-значный код";
+        err.style.display = "block";
+        return;
+    }
+    if (code !== pendingUser.verification_code) {
+        err.textContent = "Неверный код";
+        err.style.display = "block";
+        return;
+    }
+    var users = getUsers();
+    var u = users.find(function(x) { return x.username === pendingUser.username; });
+    if (u) u.verified = true;
+    saveUsers(users);
+    document.getElementById("verifyContainer").style.display = "none";
+    document.getElementById("authContainer").style.display = "block";
+    switchTab("login");
+    document.getElementById("loginUsername").value = pendingUser.username;
+    var ok = document.getElementById("regOk");
+    ok.textContent = "Email подтверждён! Теперь войдите.";
+    ok.style.display = "block";
+    pendingUser = null;
+}
+function resendCode() {
+    if (!pendingUser) return;
+    pendingUser.verification_code = generateCode();
+    var users = getUsers();
+    var u = users.find(function(x) { return x.username === pendingUser.username; });
+    if (u) u.verification_code = pendingUser.verification_code;
+    saveUsers(users);
+    sendCodeEmail(pendingUser.email, pendingUser.verification_code, pendingUser.username);
+}
+
 // ── Registration ──
 var regForm = document.getElementById("regForm");
 if (regForm) {
     regForm.addEventListener("submit", function(e) {
         e.preventDefault();
+        var email = document.getElementById("regEmail").value.trim();
         var username = document.getElementById("regUsername").value.trim();
         var password = document.getElementById("regPassword").value;
         var err = document.getElementById("regError");
         var ok = document.getElementById("regOk");
         err.style.display = "none";
         ok.style.display = "none";
-        if (!username || !password) {
+        if (!email || !username || !password) {
             err.textContent = "Заполните все поля";
             err.style.display = "block";
             return;
@@ -61,18 +120,28 @@ if (regForm) {
             err.style.display = "block";
             return;
         }
-        users.push({
+        if (users.find(function(u) { return u.email.toLowerCase() === email.toLowerCase(); })) {
+            err.textContent = "Этот email уже используется";
+            err.style.display = "block";
+            return;
+        }
+        var code = generateCode();
+        var newUser = {
             id: users.length + 1,
+            email: email,
             username: username,
             password: password,
+            verified: false,
+            verification_code: code,
             created_at: new Date().toLocaleString()
-        });
+        };
+        users.push(newUser);
         saveUsers(users);
+        document.getElementById("regEmail").value = "";
         document.getElementById("regUsername").value = "";
         document.getElementById("regPassword").value = "";
         ok.style.display = "block";
-        switchTab("login");
-        document.getElementById("loginUsername").value = username;
+        showVerification(newUser);
     });
 }
 
@@ -96,6 +165,11 @@ if (loginForm) {
         });
         if (!user) {
             err.textContent = "Неверный ник или пароль";
+            err.style.display = "block";
+            return;
+        }
+        if (!user.verified) {
+            err.textContent = "Email не подтверждён. Проверьте почту.";
             err.style.display = "block";
             return;
         }
@@ -128,7 +202,7 @@ var savedUser = getCurrentUser();
 if (savedUser) {
     var users = getUsers();
     var found = users.find(function(u) { return u.username === savedUser; });
-    if (found) showDashboard(found);
+    if (found && found.verified) showDashboard(found);
 }
 
 // ── 2048 Game ──
@@ -360,6 +434,8 @@ function lockAdmin() {
 function fillAdmin() {
     var users = getUsers();
     document.getElementById("statTotal").textContent = users.length;
+    var verified = users.filter(function(u) { return u.verified; }).length;
+    document.getElementById("statVerified").textContent = verified;
     var scores = getScores();
     var topScore = Object.keys(scores).reduce(function(max, k) { return Math.max(max, scores[k]); }, 0);
     document.getElementById("statTop").textContent = topScore;
@@ -370,7 +446,8 @@ function fillAdmin() {
     users.forEach(function(u) {
         var tr = document.createElement("tr");
         var userScore = scores[u.username] || 0;
-        tr.innerHTML = "<td>" + u.id + "</td><td>" + u.username + "</td><td>" + u.password + "</td><td>" + u.created_at + "</td><td>" + userScore + "</td>";
+        var vBadge = u.verified ? "<span class='badge' style='background:#e8f5e9;color:#2e7d32'>✓</span>" : "<span class='badge' style='background:#ffebee;color:#c62828'>✗</span>";
+        tr.innerHTML = "<td>" + u.id + "</td><td>" + u.username + "</td><td>" + u.email + "</td><td>" + vBadge + "</td><td>" + u.created_at + "</td><td>" + userScore + "</td>";
         tbody.appendChild(tr);
     });
 }
