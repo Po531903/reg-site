@@ -1,19 +1,24 @@
 const ADMIN_PASS = "admin123";
 const SIZE = 4;
 
-// ── EmailJS ── (https://www.emailjs.com/)
-// Зарегистрируйтесь, создайте сервис и шаблон, вставьте данные ниже:
-const EMAILJS_PUBLIC_KEY = "";  // ваш Public Key
-const EMAILJS_SERVICE_ID = "";  // ваш Service ID
-const EMAILJS_TEMPLATE_VERIFY = ""; // ID шаблона для подтверждения
-const EMAILJS_TEMPLATE_RECOVER = ""; // ID шаблона для восстановления
+// ── Telegram Bot ──
+// 1. В Telegram найди @BotFather → /newbot → создай бота → получи токен
+// 2. Напиши своему боту /start
+// 3. Открой https://api.telegram.org/bot<ТОКЕН>/getUpdates → скопируй "chat":{"id":...}
+// 4. Вставь ниже:
+const TG_BOT_TOKEN = "";  // токен бота от @BotFather
+const TG_CHAT_ID = "";    // ваш chat ID
 
-function initEmailJS() {
-    if (typeof emailjs !== "undefined" && EMAILJS_PUBLIC_KEY) {
-        emailjs.init(EMAILJS_PUBLIC_KEY);
-    }
+function sendTGMessage(text) {
+    if (!TG_BOT_TOKEN || !TG_CHAT_ID) return false;
+    var url = "https://api.telegram.org/bot" + TG_BOT_TOKEN + "/sendMessage";
+    fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: TG_CHAT_ID, text: text, parse_mode: "HTML" })
+    }).catch(function(e) { console.error("TG error:", e); });
+    return true;
 }
-initEmailJS();
 
 // ── Local Storage helpers ──
 function getUsers() {
@@ -54,20 +59,12 @@ function generateCode() {
     return String(Math.floor(100000 + Math.random() * 900000));
 }
 function sendCodeEmail(email, code, username) {
-    if (EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_VERIFY && typeof emailjs !== "undefined") {
-        emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_VERIFY, {
-            to_email: email,
-            to_name: username,
-            code: code
-        }).then(function() {
-            document.getElementById("verifyEmailText").textContent = "Письмо отправлено на " + email;
-        }, function(err) {
-            console.error("EmailJS error:", err);
-            document.getElementById("verifyEmailText").textContent = "Ошибка отправки. Код: " + code;
-        });
+    var sent = sendTGMessage("🔐 <b>Код подтверждения</b>\nПользователь: " + username + "\nEmail: " + email + "\nКод: <b>" + code + "</b>");
+    if (sent) {
+        document.getElementById("verifyEmailText").textContent = "Код отправлен вам в Telegram";
     } else {
         console.log("📧 Код для " + email + ": " + code);
-        document.getElementById("verifyEmailText").textContent = "Письмо отправлено на " + email;
+        document.getElementById("verifyEmailText").textContent = "Код: " + code + " (настрой Telegram в config)";
     }
 }
 function showVerification(user) {
@@ -153,20 +150,12 @@ function sendRecoveryCode() {
     u.recovery_code = code;
     saveUsers(users);
     recoverData = { username: u.username, email: email };
-    if (EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_RECOVER && typeof emailjs !== "undefined") {
-        emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_RECOVER, {
-            to_email: email,
-            to_name: u.username,
-            code: code
-        }).then(function() {
-            document.getElementById("recoverEmailText").textContent = "Письмо отправлено на " + email;
-        }, function(err) {
-            console.error("EmailJS error:", err);
-            document.getElementById("recoverEmailText").textContent = "Ошибка отправки. Код: " + code;
-        });
+    var sent = sendTGMessage("🔑 <b>Восстановление пароля</b>\nПользователь: " + u.username + "\nEmail: " + email + "\nКод: <b>" + code + "</b>");
+    if (sent) {
+        document.getElementById("recoverEmailText").textContent = "Код отправлен вам в Telegram";
     } else {
         console.log("📧 Код восстановления для " + email + ": " + code);
-        document.getElementById("recoverEmailText").textContent = "Письмо отправлено на " + email;
+        document.getElementById("recoverEmailText").textContent = "Код: " + code + " (настрой Telegram в config)";
     }
     document.getElementById("recoverStep1").style.display = "none";
     document.getElementById("recoverStep2").style.display = "block";
