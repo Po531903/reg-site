@@ -1,75 +1,7 @@
 <!DOCTYPE html>
 <html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Админ-панель</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-<div id="loginScreen" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:999">
-    <div class="container" style="max-width:360px;text-align:center">
-        <h2>🔐 Вход в админку</h2>
-        <div id="loginError" class="error" style="display:none">Неверный пароль</div>
-        <input type="password" id="adminPass" placeholder="Пароль администратора" autocomplete="off">
-        <button onclick="checkAdminPass()">Войти</button>
-    </div>
-</div>
-
-<div id="adminContent" style="display:none">
-    <div class="container" style="max-width:800px">
-        <div class="dashboard-header">
-            <div>
-                <h2>👑 Админ-панель</h2>
-                <div class="user-info">Управление пользователями и рекордами</div>
-            </div>
-            <button class="logout-btn btn-secondary" onclick="lockAdmin()">Заблокировать</button>
-        </div>
-
-        <div class="admin-stats">
-            <div class="stat-card">
-                <div class="num" id="statTotal">0</div>
-                <div class="label">Всего пользователей</div>
-            </div>
-            <div class="stat-card">
-                <div class="num" id="statTop">0</div>
-                <div class="label">Рекордный счёт</div>
-            </div>
-            <div class="stat-card">
-                <div class="num" id="statGames">0</div>
-                <div class="label">Игроков в 2048</div>
-            </div>
-        </div>
-
-        <div class="admin-actions">
-            <button class="btn-danger" onclick="clearUsers()">🗑 Очистить всех</button>
-            <button class="btn-secondary" onclick="location.reload()">🔄 Обновить</button>
-        </div>
-
-        <div class="search-box">
-            <input type="text" id="adminSearch" placeholder="🔍 Поиск по нику..." oninput="filterAdmin()">
-        </div>
-
-        <div class="admin-table-wrap">
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Ник</th>
-                        <th>Пароль</th>
-                        <th>Дата регистрации</th>
-                        <th>Рекорд 2048</th>
-                    </tr>
-                </thead>
-                <tbody id="adminTableBody"></tbody>
-            </table>
-        </div>
-
-        <p class="admin-link"><a href="index.html">← На главную</a></p>
-    </div>
-</div>
-
-<script src="app.js"></script>
+<head><meta charset="UTF-8"><title>403</title></head>
+<body style="background:#1a1a2e;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;font-family:Arial;color:white">
+    <div style="text-align:center"><h1>403</h1><p>Доступ запрещён</p></div>
 </body>
 </html>
