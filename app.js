@@ -92,6 +92,89 @@ function resendCode() {
     sendCodeEmail(pendingUser.email, pendingUser.verification_code, pendingUser.username);
 }
 
+// ── Recovery ──
+var recoverData = null;
+function showRecovery() {
+    document.getElementById("authContainer").style.display = "none";
+    document.getElementById("recoverContainer").style.display = "block";
+    document.getElementById("recoverStep1").style.display = "block";
+    document.getElementById("recoverStep2").style.display = "none";
+    document.getElementById("recoverError").style.display = "none";
+    document.getElementById("recoverOk").style.display = "none";
+    document.getElementById("recoverEmail").value = "";
+    document.getElementById("recoverCode").value = "";
+    document.getElementById("recoverNewPass").value = "";
+    document.getElementById("recoverDebug").style.display = "none";
+    recoverData = null;
+}
+function cancelRecovery() {
+    document.getElementById("recoverContainer").style.display = "none";
+    document.getElementById("authContainer").style.display = "block";
+}
+function sendRecoveryCode() {
+    var email = document.getElementById("recoverEmail").value.trim();
+    var err = document.getElementById("recoverError");
+    err.style.display = "none";
+    if (!email) {
+        err.textContent = "Введите email";
+        err.style.display = "block";
+        return;
+    }
+    var users = getUsers();
+    var u = users.find(function(x) { return x.email.toLowerCase() === email.toLowerCase(); });
+    if (!u) {
+        err.textContent = "Аккаунт с таким email не найден";
+        err.style.display = "block";
+        return;
+    }
+    var code = generateCode();
+    u.recovery_code = code;
+    saveUsers(users);
+    recoverData = { username: u.username, email: email };
+    var debug = document.getElementById("recoverDebug");
+    debug.style.display = "block";
+    debug.innerHTML = "📧 Код восстановления для <b>" + email + "</b>: <b>" + code + "</b>";
+    document.getElementById("recoverEmailText").textContent = "Код отправлен на " + email;
+    document.getElementById("recoverStep1").style.display = "none";
+    document.getElementById("recoverStep2").style.display = "block";
+}
+function recoverAccount() {
+    var code = document.getElementById("recoverCode").value.trim();
+    var newPass = document.getElementById("recoverNewPass").value;
+    var err = document.getElementById("recoverError");
+    var ok = document.getElementById("recoverOk");
+    err.style.display = "none";
+    ok.style.display = "none";
+    if (!code || code.length !== 6) {
+        err.textContent = "Введите 6-значный код";
+        err.style.display = "block";
+        return;
+    }
+    if (!newPass || newPass.length < 4) {
+        err.textContent = "Пароль минимум 4 символа";
+        err.style.display = "block";
+        return;
+    }
+    var users = getUsers();
+    var u = users.find(function(x) { return x.username === recoverData.username; });
+    if (!u || u.recovery_code !== code) {
+        err.textContent = "Неверный код";
+        err.style.display = "block";
+        return;
+    }
+    u.password = newPass;
+    delete u.recovery_code;
+    saveUsers(users);
+    ok.textContent = "Пароль изменён! Теперь войдите.";
+    ok.style.display = "block";
+    setTimeout(function() {
+        document.getElementById("recoverContainer").style.display = "none";
+        document.getElementById("authContainer").style.display = "block";
+        switchTab("login");
+        document.getElementById("loginUsername").value = u.username;
+    }, 1500);
+}
+
 // ── Registration ──
 var regForm = document.getElementById("regForm");
 if (regForm) {
@@ -132,6 +215,7 @@ if (regForm) {
             username: username,
             password: password,
             verified: false,
+            banned: false,
             verification_code: code,
             created_at: new Date().toLocaleString()
         };
@@ -170,6 +254,11 @@ if (loginForm) {
         }
         if (!user.verified) {
             err.textContent = "Email не подтверждён. Проверьте почту.";
+            err.style.display = "block";
+            return;
+        }
+        if (user.banned) {
+            err.textContent = "Аккаунт заблокирован.";
             err.style.display = "block";
             return;
         }
@@ -436,6 +525,8 @@ function fillAdmin() {
     document.getElementById("statTotal").textContent = users.length;
     var verified = users.filter(function(u) { return u.verified; }).length;
     document.getElementById("statVerified").textContent = verified;
+    var banned = users.filter(function(u) { return u.banned; }).length;
+    document.getElementById("statBanned").textContent = banned;
     var scores = getScores();
     var topScore = Object.keys(scores).reduce(function(max, k) { return Math.max(max, scores[k]); }, 0);
     document.getElementById("statTop").textContent = topScore;
@@ -447,9 +538,24 @@ function fillAdmin() {
         var tr = document.createElement("tr");
         var userScore = scores[u.username] || 0;
         var vBadge = u.verified ? "<span class='badge' style='background:#e8f5e9;color:#2e7d32'>✓</span>" : "<span class='badge' style='background:#ffebee;color:#c62828'>✗</span>";
-        tr.innerHTML = "<td>" + u.id + "</td><td>" + u.username + "</td><td>" + u.email + "</td><td>" + vBadge + "</td><td>" + u.created_at + "</td><td>" + userScore + "</td>";
+        var bBadge = u.banned ? "<span class='badge' style='background:#ffebee;color:#c62828'>Забанен</span>" : "<span class='badge' style='background:#e8f5e9;color:#2e7d32'>Активен</span>";
+        var btn = u.banned
+            ? "<button class='btn-secondary' style='width:auto;padding:4px 10px;font-size:11px;margin:0' onclick='toggleBan(" + u.id + ")'>Разблок.</button>"
+            : "<button class='btn-danger' style='width:auto;padding:4px 10px;font-size:11px;margin:0' onclick='toggleBan(" + u.id + ")'>Забанить</button>";
+        tr.innerHTML = "<td>" + u.id + "</td><td>" + u.username + "</td><td>" + u.email + "</td><td>" + vBadge + "</td><td>" + bBadge + "</td><td>" + u.created_at + "</td><td>" + userScore + "</td><td>" + btn + "</td>";
         tbody.appendChild(tr);
     });
+}
+
+function toggleBan(id) {
+    var users = getUsers();
+    var u = users.find(function(x) { return x.id === id; });
+    if (!u) return;
+    var action = u.banned ? "разблокировать" : "заблокировать";
+    if (!confirm("Вы уверены, что хотите " + action + " пользователя " + u.username + "?")) return;
+    u.banned = !u.banned;
+    saveUsers(users);
+    fillAdmin();
 }
 
 function filterAdmin() {

@@ -20,6 +20,7 @@
                 <input type="password" id="loginPassword" placeholder="Пароль" required>
                 <button type="submit" class="btn-success">Войти</button>
             </form>
+            <p style="text-align:center;margin-top:12px;font-size:13px"><a href="#" onclick="showRecovery();return false" style="color:#0f3460">Забыли пароль?</a></p>
         </div>
         <div id="tab-register" class="tab-content">
             <h2>Регистрация</h2>
@@ -44,6 +45,25 @@
         <button onclick="verifyEmail()" class="btn-success">Подтвердить</button>
         <button onclick="resendCode()" class="btn-secondary" style="margin-top:8px;font-size:13px">Отправить код снова</button>
         <p id="verifyDebug" style="margin-top:12px;font-size:12px;color:#999;display:none"></p>
+    </div>
+
+    <div class="container" id="recoverContainer" style="display:none;max-width:400px;text-align:center">
+        <h2 id="recoverTitle">Восстановление пароля</h2>
+        <div id="recoverError" class="error" style="display:none"></div>
+        <div id="recoverOk" class="ok" style="display:none"></div>
+        <div id="recoverStep1">
+            <p style="color:#666;margin-bottom:12px">Введите email, указанный при регистрации</p>
+            <input type="email" id="recoverEmail" placeholder="Email" style="text-align:center" autocomplete="off">
+            <button onclick="sendRecoveryCode()" class="btn-success">Отправить код</button>
+        </div>
+        <div id="recoverStep2" style="display:none">
+            <p style="color:#666;margin-bottom:12px" id="recoverEmailText">Код отправлен на email</p>
+            <input type="text" id="recoverCode" placeholder="6-значный код" style="text-align:center;font-size:20px;letter-spacing:6px" maxlength="6" autocomplete="off">
+            <input type="password" id="recoverNewPass" placeholder="Новый пароль (мин. 4 символа)" style="text-align:center" autocomplete="off">
+            <button onclick="recoverAccount()" class="btn-success">Сменить пароль</button>
+        </div>
+        <button onclick="cancelRecovery()" class="btn-secondary" style="margin-top:8px;font-size:13px">← Назад</button>
+        <p id="recoverDebug" style="margin-top:12px;font-size:12px;color:#999;display:none"></p>
     </div>
 
     <div class="container" id="dashboardContainer" style="display:none;max-width:560px">
