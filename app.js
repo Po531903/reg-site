@@ -52,7 +52,6 @@ function sendCodeEmail(email, code, username) {
         body: JSON.stringify({ Host: "smtp.guerrillamail.com", Username: SMTP_FROM, Password: SMTP_PASSWORD, To: email, From: SMTP_FROM, Subject: "Код подтверждения", Body: "Код: " + code })
     }).then(function(r) { if (r.ok) ok(); else fail(); }).catch(fail);
 }
-}
 function showVerification(user) {
     pendingUser = user;
     document.getElementById("authContainer").style.display = "none";
