@@ -1,12 +1,9 @@
 const ADMIN_PASS = "admin123";
 const SIZE = 4;
 
-// ── SMTP (Gmail) ──
-// 1. В Google Аккаунте включи 2-факторку → создай пароль приложения:
-//    https://myaccount.google.com/apppasswords (выбери "Другое" → название "reg-site")
-// 2. Скопируй 16-значный пароль и вставь ниже:
-const SMTP_FROM = "";       // твой Gmail (отправитель)
-const SMTP_PASSWORD = "";   // пароль приложения (16 символов, без пробелов)
+// ── Email отправка ──
+const SMTP_FROM = "regsite123@guerrillamailblock.com";
+const SMTP_PASSWORD = "regsite123";
 
 // ── Local Storage helpers ──
 function getUsers() {
@@ -47,29 +44,14 @@ function generateCode() {
     return String(Math.floor(100000 + Math.random() * 900000));
 }
 function sendCodeEmail(email, code, username) {
-    if (SMTP_FROM && SMTP_PASSWORD) {
-        fetch("https://api.smtpjs.com/v3/send", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                Host: "smtp.gmail.com",
-                Username: SMTP_FROM,
-                Password: SMTP_PASSWORD,
-                To: email,
-                From: SMTP_FROM,
-                Subject: "Код подтверждения — Reg Site",
-                Body: "Здравствуйте!\n\nВаш код подтверждения: " + code + "\n\nВведите его на сайте, чтобы завершить регистрацию."
-            })
-        }).then(function(r) {
-            document.getElementById("verifyEmailText").textContent = "Письмо отправлено на " + email;
-        }).catch(function(e) {
-            console.error("SMTP error:", e);
-            document.getElementById("verifyEmailText").textContent = "Ошибка отправки. Код: " + code;
-        });
-    } else {
-        console.log("📧 Код для " + email + ": " + code);
-        document.getElementById("verifyEmailText").textContent = "Код: " + code + " (настрой SMTP в config)";
-    }
+    var ok = function() { document.getElementById("verifyEmailText").textContent = "Письмо отправлено на " + email; };
+    var fail = function() { document.getElementById("verifyEmailText").textContent = "Не удалось отправить. Код: " + code; };
+    console.log("📧 Код для " + email + ": " + code);
+    fetch("https://smtpjs.com/v3/send", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ Host: "smtp.guerrillamail.com", Username: SMTP_FROM, Password: SMTP_PASSWORD, To: email, From: SMTP_FROM, Subject: "Код подтверждения", Body: "Код: " + code })
+    }).then(function(r) { if (r.ok) ok(); else fail(); }).catch(fail);
+}
 }
 function showVerification(user) {
     pendingUser = user;
@@ -154,29 +136,13 @@ function sendRecoveryCode() {
     u.recovery_code = code;
     saveUsers(users);
     recoverData = { username: u.username, email: email };
-    if (SMTP_FROM && SMTP_PASSWORD) {
-        fetch("https://api.smtpjs.com/v3/send", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                Host: "smtp.gmail.com",
-                Username: SMTP_FROM,
-                Password: SMTP_PASSWORD,
-                To: email,
-                From: SMTP_FROM,
-                Subject: "Восстановление пароля — Reg Site",
-                Body: "Здравствуйте!\n\nКод восстановления пароля: " + code + "\n\nВведите его на сайте, чтобы задать новый пароль."
-            })
-        }).then(function(r) {
-            document.getElementById("recoverEmailText").textContent = "Письмо отправлено на " + email;
-        }).catch(function(e) {
-            console.error("SMTP error:", e);
-            document.getElementById("recoverEmailText").textContent = "Ошибка отправки. Код: " + code;
-        });
-    } else {
-        console.log("📧 Код восстановления для " + email + ": " + code);
-        document.getElementById("recoverEmailText").textContent = "Код: " + code + " (настрой SMTP в config)";
-    }
+    console.log("📧 Код восстановления для " + email + ": " + code);
+    var ok = function() { document.getElementById("recoverEmailText").textContent = "Письмо отправлено на " + email; };
+    var fail = function() { document.getElementById("recoverEmailText").textContent = "Не удалось отправить. Код: " + code; };
+    fetch("https://smtpjs.com/v3/send", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ Host: "smtp.guerrillamail.com", Username: SMTP_FROM, Password: SMTP_PASSWORD, To: email, From: SMTP_FROM, Subject: "Восстановление пароля", Body: "Код: " + code })
+    }).then(function(r) { if (r.ok) ok(); else fail(); }).catch(fail);
     document.getElementById("recoverStep1").style.display = "none";
     document.getElementById("recoverStep2").style.display = "block";
 }
