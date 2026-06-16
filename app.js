@@ -1,6 +1,20 @@
 const ADMIN_PASS = "admin123";
 const SIZE = 4;
 
+// ── EmailJS ── (https://www.emailjs.com/)
+// Зарегистрируйтесь, создайте сервис и шаблон, вставьте данные ниже:
+const EMAILJS_PUBLIC_KEY = "";  // ваш Public Key
+const EMAILJS_SERVICE_ID = "";  // ваш Service ID
+const EMAILJS_TEMPLATE_VERIFY = ""; // ID шаблона для подтверждения
+const EMAILJS_TEMPLATE_RECOVER = ""; // ID шаблона для восстановления
+
+function initEmailJS() {
+    if (typeof emailjs !== "undefined" && EMAILJS_PUBLIC_KEY) {
+        emailjs.init(EMAILJS_PUBLIC_KEY);
+    }
+}
+initEmailJS();
+
 // ── Local Storage helpers ──
 function getUsers() {
     return JSON.parse(localStorage.getItem("users") || "[]");
@@ -40,8 +54,21 @@ function generateCode() {
     return String(Math.floor(100000 + Math.random() * 900000));
 }
 function sendCodeEmail(email, code, username) {
-    console.log("📧 Код для " + email + ": " + code);
-    document.getElementById("verifyEmailText").textContent = "Письмо отправлено на " + email;
+    if (EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_VERIFY && typeof emailjs !== "undefined") {
+        emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_VERIFY, {
+            to_email: email,
+            to_name: username,
+            code: code
+        }).then(function() {
+            document.getElementById("verifyEmailText").textContent = "Письмо отправлено на " + email;
+        }, function(err) {
+            console.error("EmailJS error:", err);
+            document.getElementById("verifyEmailText").textContent = "Ошибка отправки. Код: " + code;
+        });
+    } else {
+        console.log("📧 Код для " + email + ": " + code);
+        document.getElementById("verifyEmailText").textContent = "Письмо отправлено на " + email;
+    }
 }
 function showVerification(user) {
     pendingUser = user;
@@ -126,8 +153,21 @@ function sendRecoveryCode() {
     u.recovery_code = code;
     saveUsers(users);
     recoverData = { username: u.username, email: email };
-    console.log("📧 Код восстановления для " + email + ": " + code);
-    document.getElementById("recoverEmailText").textContent = "Письмо отправлено на " + email;
+    if (EMAILJS_SERVICE_ID && EMAILJS_TEMPLATE_RECOVER && typeof emailjs !== "undefined") {
+        emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_RECOVER, {
+            to_email: email,
+            to_name: u.username,
+            code: code
+        }).then(function() {
+            document.getElementById("recoverEmailText").textContent = "Письмо отправлено на " + email;
+        }, function(err) {
+            console.error("EmailJS error:", err);
+            document.getElementById("recoverEmailText").textContent = "Ошибка отправки. Код: " + code;
+        });
+    } else {
+        console.log("📧 Код восстановления для " + email + ": " + code);
+        document.getElementById("recoverEmailText").textContent = "Письмо отправлено на " + email;
+    }
     document.getElementById("recoverStep1").style.display = "none";
     document.getElementById("recoverStep2").style.display = "block";
 }
