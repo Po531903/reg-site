@@ -9,10 +9,19 @@
 <body>
     <div class="container" id="authContainer">
         <div class="tabs">
-            <div class="tab active" onclick="switchTab('register')">Регистрация</div>
-            <div class="tab" onclick="switchTab('login')">Вход</div>
+            <div class="tab active" onclick="switchTab('login')">Вход</div>
+            <div class="tab" onclick="switchTab('register')">Регистрация</div>
         </div>
-        <div id="tab-register" class="tab-content active">
+        <div id="tab-login" class="tab-content active">
+            <h2>Вход</h2>
+            <div id="loginError" class="error" style="display:none"></div>
+            <form id="loginForm">
+                <input type="text" id="loginUsername" placeholder="Ник" required autocomplete="off">
+                <input type="password" id="loginPassword" placeholder="Пароль" required>
+                <button type="submit" class="btn-success">Войти</button>
+            </form>
+        </div>
+        <div id="tab-register" class="tab-content">
             <h2>Регистрация</h2>
             <div id="regOk" class="ok" style="display:none">Аккаунт создан! Теперь войдите.</div>
             <div id="regError" class="error" style="display:none"></div>
@@ -22,25 +31,16 @@
                 <button type="submit">Зарегистрироваться</button>
             </form>
         </div>
-        <div id="tab-login" class="tab-content">
-            <h2>Вход</h2>
-            <div id="loginError" class="error" style="display:none"></div>
-            <form id="loginForm">
-                <input type="text" id="loginUsername" placeholder="Ник" required autocomplete="off">
-                <input type="password" id="loginPassword" placeholder="Пароль" required>
-                <button type="submit" class="btn-success">Войти</button>
-            </form>
-        </div>
         <p class="admin-link"><a href="admin.html">Админ-панель</a></p>
     </div>
 
     <div class="container" id="dashboardContainer" style="display:none;max-width:560px">
-        <div class="dashboard-header">
+        <div class="dashboard-header" style="padding-bottom:10px;margin-bottom:12px">
             <div>
-                <h2 id="dashUsername"></h2>
-                <div class="user-info" id="dashUserInfo"></div>
+                <span id="dashUsername" style="font-weight:700;color:#1a1a2e"></span>
+                <span class="user-info" id="dashUserInfo" style="margin-left:8px;font-size:12px"></span>
             </div>
-            <button class="logout-btn btn-secondary" onclick="logout()">Выйти</button>
+            <button class="logout-btn btn-secondary" onclick="logout()" style="padding:5px 12px;font-size:12px">Выйти</button>
         </div>
 
         <div class="game-wrapper">

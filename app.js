@@ -25,12 +25,12 @@ function setCurrentUser(username) {
 function switchTab(tab) {
     document.querySelectorAll(".tab").forEach(function(t) { t.classList.remove("active"); });
     document.querySelectorAll(".tab-content").forEach(function(t) { t.classList.remove("active"); });
-    if (tab === "register") {
+    if (tab === "login") {
         document.querySelectorAll(".tab")[0].classList.add("active");
-        document.getElementById("tab-register").classList.add("active");
+        document.getElementById("tab-login").classList.add("active");
     } else {
         document.querySelectorAll(".tab")[1].classList.add("active");
-        document.getElementById("tab-login").classList.add("active");
+        document.getElementById("tab-register").classList.add("active");
     }
 }
 
